@@ -228,9 +228,6 @@ async def on_message(message):
         #Executes if food dictionary is empty                
         else:
             await client.send_message(message.channel, "Press any number to continue: ")
-            response = await client.wait_for_message()
-            while response.content.isspace() or not response.content:
-                response = await client.wait_for_message()
             while True:
                     try:
                         response = await client.wait_for_message()
@@ -260,34 +257,44 @@ async def on_message(message):
             #Yelp functionality
             await client.send_message(message.channel, "What's your location?")
             location = await client.wait_for_message()
-            while location.content.isspace() or not location.content:
+            while len(location.content) <=1 or message.author == client.user:
+                await client.send_message(message.channel, "Invalid location! Please enter again!.")
                 location = await client.wait_for_message()
             result = search(API_KEY,food, location.content)
             rlist = result['businesses']
-            rdic = rlist[0]
-            name = rdic["name"]
-            addressd = rdic["location"]
-            address = addressd["address1"] + " " + addressd["city"] + " " + addressd["state"] + " " + addressd["zip_code"]
-            rating = rdic["rating"]
-            await client.send_message(message.channel, f"Here is a {food} place near {location.content}: {name}, {address}, Rating: {rating}.")
+            if len(rlist) < 1:
+                await client.send_message(message.channel, "Yelp currently does not have this food. You shoud drop some feedback!")
+            else:
+                rdic = rlist[0]
+                name = rdic["name"]
+                addressd = rdic["location"]
+                address = addressd["address1"] + " " + addressd["city"] + " " + addressd["state"] + " " + addressd["zip_code"]
+                rating = rdic["rating"]
+                await client.send_message(message.channel, f"Here is a {food.content} place near {location.content}: {name}, {address}, Rating: {rating}.")
 
         elif int(response.content.replace(" ","")) == 2 or len(foodDict) < 1 or not foodDict:
             await client.send_message(message.channel, "What food would you like to eat?")
             food = await client.wait_for_message()
-            while food.content.isspace() or not food.content:
+            while len(food.content) <= 1 or message.author == client.user:
+                await client.send_message(message.channel, "Invalid food! Please enter again!.")
                 food = await client.wait_for_message()
             await client.send_message(message.channel, "What's your location?")
             location = await client.wait_for_message()
-            while location.content.isspace() or not location.content:
+            while len(location.content) <=1 or message.author == client.user:
+                await client.send_message(message.channel, "Invalid location! Please enter again!.")
                 location = await client.wait_for_message()
+            print(len(location.content))
             result = search(API_KEY,food.content, location.content)
             rlist = result['businesses']
-            rdic = rlist[0]
-            name = rdic["name"]
-            addressd = rdic["location"]
-            address = addressd["address1"] + " " + addressd["city"] + " " + addressd["state"] + " " + addressd["zip_code"]
-            rating = rdic["rating"]
-            await client.send_message(message.channel, f"Here is a {food.content} place near {location.content}: {name}, {address}, Rating: {rating}.")
+            if len(rlist) < 1:
+                await client.send_message(message.channel, "Yelp currently does not have this food you shoud drop some feedback!0")
+            else:
+                rdic = rlist[0]
+                name = rdic["name"]
+                addressd = rdic["location"]
+                address = addressd["address1"] + " " + addressd["city"] + " " + addressd["state"] + " " + addressd["zip_code"]
+                rating = rdic["rating"]
+                await client.send_message(message.channel, f"Here is a {food.content} place near {location.content}: {name}, {address}, Rating: {rating}.")
 
     #Command that clears dictionary of "learned" food
     if message.content.startswith("!clear"):
